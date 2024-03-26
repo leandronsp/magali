@@ -169,7 +169,7 @@ _handle:
    mov rbp, rsp           ; preserve base pointer
    mov r10, [rbp + 16]    ; 1st argument in the stack (connection)
    pop rbp                ; drop stack frame
-
+.open_file:
    ; open HTTP/HTML file for reading
    mov rdi, index_filename
    mov rsi, 0        ; read mode
@@ -177,26 +177,26 @@ _handle:
    mov rax, SYS_open
    syscall
    mov [resfd], rax
-
+.read_file:
    ; read the response content from file
    mov rdi, [resfd]
    mov rsi, resBuf
    mov rdx, resBufLen
    mov rax, SYS_read
    syscall
-
+.close_file:
+   ; close response file
+   mov rdi, [resfd]
+   mov eax, SYS_close
+   syscall
+.write_client:
    ; write response into the connection socket
    mov rdi, r10
    mov rsi, resBuf
    mov rdx, resBufLen
    mov rax, SYS_write
    syscall
-
-   ; close response file
-   mov rdi, [resfd]
-   mov eax, SYS_close
-   syscall
-
+.close_client:
    ; close the client socket
    mov rdi, r10
    mov rax, SYS_close
